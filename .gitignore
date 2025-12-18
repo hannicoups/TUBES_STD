@@ -1,0 +1,10 @@
+# hasil compile
+*.o
+*.exe
+*.dll
+
+# vscode setting lokal
+.vscode/
+
+# zip / arsip
+*.zip
