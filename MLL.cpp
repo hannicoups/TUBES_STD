@@ -413,9 +413,9 @@ void menuJebloskan (Penjara &P){
         cin >> opsi;
 
         switch(opsi){
-            case 1: 
+            case 1: {
                 string idBlok, nomorSel, idNapi;
-                adrBlok = P.first;
+                adrBlok B = P.first;
                 adrSel S;
                 adrNapi N;
 
@@ -470,6 +470,8 @@ void menuJebloskan (Penjara &P){
                 insertNapi(P, S, N);
                 cout << "Narapidana berhasil dimasukkan ke sel" << endl; 
 
+                break;
+            }   
 
             case 0: 
                 break;
@@ -484,19 +486,139 @@ void menuJebloskan (Penjara &P){
 }
 
 void menuCatatan (Penjara &P){
+    int opsi = -1;
 
+    while (opsi != 0) {
+        cout << "---------------------" << endl;
+        cout << "      MENU CATATAN   " << endl;
+        cout << "---------------------" << endl;
+        cout << "1. Tambah Catatan Narapidana"<< endl;
+        cout << "0. Kembali" << endl;
+        cout << "Pilih : " << endl;
+        cin >> opsi;
+
+        switch (opsi) {
+
+        case 1: {
+            string idNapi, idCatatan, jenis, keterangan;
+            int remisi;
+            adrNapi N;
+            N = nullptr;
+
+            cout << "ID Napi     : ";
+            cin >> idNapi;
+
+
+        }
+
+        case 0:
+        }
+    }
 }
 void menuCari (Penjara &P){
+    int opsi = -1;
 
+    while (opsi != 0) {
+        cout << "---------------------" << endl;
+        cout << "        MENU CARI    " << endl;
+        cout << "---------------------" << endl;
+        cout << "1. Cari Sel" << endl;
+        cout << "2. Cari Napi berdasarkan ID" << endl;
+        cout << "3. Cari Napi berdasarkan Nama" << endl;
+        cout << "0. Kembali" << endl;
+        cout << "Pilih : ";
+        cin >> opsi;
+
+        switch (opsi) {
+
+        case 1:
+            menuCariSel(P);
+            break;
+
+        case 2:
+            menuCariNapibyId(P);
+            break;
+
+        case 3:
+            menuCariNapibyName(P);
+            break;
+
+        case 0:
+            break;
+
+        default:
+            cout << "Opsi tidak valid!" << endl;
+        }
+    }
 }
 void menuCariSel (Penjara &P){
+    string idBlok, nomorSel;
+    adrBlok B = P.first;
+    adrSel S;
+    cout << "ID Blok   : ";
+    cin >> idBlok;
 
+    while (B != nullptr && B->id != idBlok){
+        B = B->next;
+    }
+
+    if (B == nullptr) {
+        cout << "Blok tidak ditemukan!" << endl;
+        return;
+    }
+
+    cout << "Nomor Sel : ";
+    cin >> nomorSel;
+
+    
+    S = cariSel(B->firstSel, nomorSel);
+    if (S == nullptr){
+        cout << "Sel tidak ditemukan!" << endl;
+    }else{
+        cout << "Sel ditemukan." << endl;
+    }
 }
 void menuCariNapibyId (Penjara &P){
+    string idNapi;
+    adrBlok B;
+    adrNapi N; 
+    adrSel S;
+    cout << "ID Napi : ";
+    cin >> idNapi;
 
+    
+    B = P.first;
+    N = nullptr;
+
+    while (B != nullptr && N == nullptr) {
+         
+        S = B->firstSel;
+        while (S != nullptr && N == nullptr) {
+            N = cariNapi(S->firstNapi, idNapi);
+            S = S->next;
+        }
+
+        B = B->next;
+    }
+
+    if (N == nullptr){
+        cout << "Narapidana tidak ditemukan!" << endl;
+    }else{
+        displayNapi(N);
+    }
 }
 void menuCariNapibyName (Penjara &P){
-
+    string nama;
+    adrNapi N;
+    cout << "Nama Napi : ";
+    cin >> nama;
+ 
+    N = cariNamaNapi(P, nama);
+    if (N == nullptr){
+        cout << "Narapidana tidak ditemukan!" << endl;
+    else
+        displayNapi(N);
+    }
 }
 void menuHapus (Penjara &P){
 

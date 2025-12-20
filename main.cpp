@@ -5,8 +5,8 @@ using namespace std;
 int main() {
     
     Penjara P;
-    createPenjara(P);\
-    int opsi = -1;
+    createPenjara(P);
+    menuUtama(P); 
 
     return 0;
 }
