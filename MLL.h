@@ -10,17 +10,6 @@ typedef struct elmVonis *adrVonis;
 typedef struct elmSel *adrSel;
 typedef struct elmBlok *adrBlok;
 
-string hari[7] = {"Senin","Selasa","Rabu","Kamis","Jum'at","Sabtu","Minggu"}
-string bulan[12] = {"Januari","Februari","Maret","April","Mei","Juni","Juli","Agustus","September","Oktober","November","Desember"};
-string jenisKejahatan[8] = {"Pembunuhan", "Penganiayaan", "Korupsi", "narkoba", "pelecehan", "terorisme", "perampokan", "penggelapan"};
-
-//Info Alamat
-struct infoAlamat {
-    string rtRw;
-    string kelDesa;
-    string kecamatan;
-};
-
 //Info tanggal
 struct tanggal{
     int hari;
@@ -33,10 +22,6 @@ struct infoKependudukan {
     string nama;
     tanggal tglLahir;
     string jenisKelamin;
-    infoAlamat alamat;
-    string statusPerkawinan;
-    string pekerjaan;
-    string kewarganegaraan;
 };
 
 //Struct Narapidana
@@ -46,9 +31,7 @@ struct elmNapi {
     tanggal tglMasuk;
     tanggal tglKeluar;
     tanggal tglEksekusi;
-    infoAlamat lokasiPenjara;
     adrVonis firstVonis;
-    string status;
     adrCatatan firstCatatan;
     adrNapi next;
 };
@@ -63,7 +46,7 @@ struct elmVonis {
 //Struct Catatan Perihal Narapidana
 struct elmCatatan {
     string id;
-    string jenis;         
+    string jenis;
     string keterangan;
     int remisi;
     adrCatatan next;
@@ -71,7 +54,7 @@ struct elmCatatan {
 
 //Struct Sel
 struct elmSel {
-    string nomor;
+    int nomor;
     int kapasitas;
     adrNapi firstNapi;
     adrSel next;
@@ -79,11 +62,10 @@ struct elmSel {
 
 //Struct Blok
 struct elmBlok {
-    string id;
     string nama;
-    int jumlahSel;       
+    int jumlahSel;
     adrSel firstSel;
-    adrBlok next;         
+    adrBlok next;
 };
 
 //Struct Penjara
@@ -93,41 +75,48 @@ struct Penjara {
 
 //Create
 void createPenjara (Penjara &P);
-void createBlok (adrBlok &B);
-void createSel (adrSel &S);
-void createNapi (adrNapi &N);
+void createBlok (adrBlok &B, string namaBlok, string jumlahSel);
+void createSel (adrSel &S, int nomorSel, int kapasitas);
+void createNapi (adrNapi &N, string idNapi, infoKependudukan info, tanggal tglMasuk, tanggal tglKeluar, tanggal tglEksekusi, tanggal tglSistem);
 void createVonis (adrVonis &V, string idVonis, string jenis);
-adrCatatan createCatatan(string idCatatan, string jenis, string keterangan, int remisi);
+adrCatatan createCatatan (string idCatatan, string jenis, string keterangan, int remisi);
 
 
 //Insert
-void insertBlok (Penjara &P, adrBlok B);          
-void insertSel (Penjara &P, adrBlok B, adrSel S);     
-void insertNapi (Penjara &P, adrSel S, adrNapi N);       
-void insertCatatan (Penjara &P, adrNapi, adrCatatan C);    
-void insertVonis (Penjara P, adrNapi &N, adrVonis V);
+void insertBlok (Penjara &P, adrBlok B);
+void insertSel (Penjara &P, adrBlok B, adrSel S);
+void insertNapi (Penjara &P, adrSel S, adrNapi N);
+void insertCatatan (Penjara &P, adrNapi N, adrCatatan C);
+void insertVonis (adrNapi &N, adrVonis V);
+void jebloskanNapi (Penjara &P,adrNapi N, tanggal tglSistem);
+void tambahCatatan (Penjara &P, adrSel S, adrNapi N, adrCatatan C, tanggal tglSistem);
 
-//Cari                                        
-adrSel cariSel (adrSel S, string idSel);                                    
-adrNapi cariNapi (adrSel S, string idNapi);
-adrNapi cariNamaNapi(Penjara P, string namaDiCari);
+//Cari
+adrBlok cariBlok (Penjara P, string nama);
+adrSel cariSel (adrBlok B, string nomor);
+void cariNapi (Penjara P, adrBlok &B, adrSel &S, adrNapi &N, string idNapi);
 
 //Hapus
-void hapusNapi (Penjara &P, string idNapi);
+void hapusNapi (Penjara &P, adrSel S, adrNapi N);
+
+//Boolean
+bool isFullBlok (adrBlok B);
+bool isFullSel (adrSel S);
+bool cekTanggal(int hari, int bulan, int tahun);
+bool cekTanggal2(tanggal tgl, tanggal tglSistem);
+bool cekTanggal3(tanggal tgl, tanggal tglSistem);
 
 //Display
-void displaySel (adrSel S); 
-void displayBlok (adrBlok B);            
-void displayNapi (adrNapi N);        
+void displaySel (adrSel S);
+void displayNapi (adrNapi N);
 void displayAll (Penjara P);
-void menuUtama (Penjara &P); //Menu Prioritas
-void menuGenerasi (Penjara &P); //Menu Prioritas
-void menuNarapidana (Penjara &P); //Menu Prioritas
-void menuJebloskan (Penjara &P);
-void menuCatatan (Penjara &P);
-void menuCari (Penjara &P); //Menu Prioritas
-void menuCariSel (Penjara &P);
-void menuCariNapibyId (Penjara &P);
-void menuCariNapibyName (Penjara &P);
+void menuUtama (Penjara &P, tanggal tglSistem); //Menu Prioritas
+void menuGenerasi (Penjara &P, tanggal tglSistem); //Menu Prioritas
+void menuNarapidana (Penjara &P, tanggal tglSistem); //Menu Prioritas
+void menuTampil (Penjara P, tanggal tglSistem); //Menu Prioritas
+
+//Converter
+string converterHari(int n);
+string converterBulan(int n);
 
 #endif
