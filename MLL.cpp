@@ -2,7 +2,6 @@
 
 using namespace std;
 
-string hari[7] = {"Senin","Selasa","Rabu","Kamis","Jum'at","Sabtu","Minggu"};
 string bulan[12] = {"Januari","Februari","Maret","April","Mei","Juni","Juli","Agustus","September","Oktober","November","Desember"};
 string jenisKejahatan[8] = {"Pembunuhan", "Penganiayaan", "Korupsi", "Narkoba", "Pelecehan", "Terorisme", "Perampokan", "Penggelapan"};
 
@@ -50,9 +49,8 @@ string converterBulan(int n){
     return bulan[n-1];
 }
 
-adrCatatan createCatatan(string idCatatan, string jenis, string keterangan, int remisi) {
+adrCatatan createCatatan(string jenis, string keterangan, int remisi) {
     adrCatatan C = new elmCatatan;
-    C->id = idCatatan;
     C->jenis = jenis;
     C->keterangan = keterangan;
     C->remisi = remisi; //Dalam bulan
@@ -161,7 +159,7 @@ void insertNapi(Penjara &P, adrSel S, adrNapi N){
     if(Ntemp == nullptr){
         S->firstNapi = N;
     } else {
-        while(Ntemp->next == nullptr){
+        while(Ntemp->next != nullptr){
             Ntemp = Ntemp->next;
         }
         Ntemp->next = N;
@@ -184,7 +182,7 @@ void insertVonis(adrNapi &N, adrVonis V) {
 
 void insertCatatan(Penjara &P, adrNapi N, adrCatatan C) {
     if(N->firstCatatan == nullptr){
-        N->firstCatatan == C;
+        N->firstCatatan = C;
     } else {
         adrCatatan C2;
         C2 = N->firstCatatan;
@@ -248,58 +246,64 @@ void cariNapi(Penjara P, adrBlok &B, adrSel &S, adrNapi &N, string idNapi) {
     }
 
     if(!isFound){
+        cout << endl;
         cout << "Narapidana dengan id diberikan tidak ditemukan." << endl;
+        cout << endl;
     } else {
+        cout << endl;
         cout << "Narapidana ditemukan!" << endl;
+        cout << endl;
+    }
+}
+
+void hapusSemuaVonis(adrNapi &N){
+    adrVonis v = N->firstVonis;
+    while(v != nullptr){
+        adrVonis vTemp = v;
+        v = v->next;
+        N->firstVonis = v;
+        vTemp->next = nullptr;
+        delete vTemp;
+    }
+}
+
+void hapusSemuaCatatan(adrNapi &N){
+    adrCatatan c = N->firstCatatan;
+    while(c != nullptr){
+        adrCatatan cTemp = c;
+        c = c->next;
+        N->firstCatatan = c;
+        cTemp->next = nullptr;
+        delete cTemp;
     }
 }
 
 void hapusNapi(Penjara &P, adrSel S, adrNapi N) {
     adrNapi prec;
-    adrVonis v;
-    adrCatatan c;
 
     if(S->firstNapi == N){
         S->firstNapi = N->next;
         N->next = nullptr;
-        v = N->firstVonis;
-        while(v != nullptr){
-            N->firstVonis = N->firstVonis->next;
-            delete v;
-            v = N->firstVonis;
-        }
-        c = N->firstCatatan;
-        while(c != nullptr){
-            N->firstCatatan = N->firstCatatan->next;
-            delete c;
-            c = N->firstCatatan;
-        }
+        hapusSemuaCatatan(N);
+        hapusSemuaVonis(N);
         delete N;
     } else {
         prec = S->firstNapi;
         while(prec->next != N){
             prec = prec->next;
         }
-        prec = N->next;
+        prec->next = N->next;
         N->next = nullptr;
-        delete N;
-        while(v != nullptr){
-            N->firstVonis = N->firstVonis->next;
-            delete v;
-            v = N->firstVonis;
-        }
-        c = N->firstCatatan;
-        while(c != nullptr){
-            N->firstCatatan = N->firstCatatan->next;
-            delete c;
-            c = N->firstCatatan;
-        }
+        hapusSemuaCatatan(N);
+        hapusSemuaVonis(N);
         delete N;
     }
 }
 
 
 void displayNapi(adrNapi N) {
+    int i = 1;
+    adrVonis v = N->firstVonis;
     cout << "--------------------------------" << endl;
     cout << "              NAPI              " << endl;
     cout << "--------------------------------" << endl;
@@ -308,24 +312,43 @@ void displayNapi(adrNapi N) {
     cout << "Tanggal Lahir    : " << N->info.tglLahir.hari << " " << converterBulan(N->info.tglLahir.bulan) << " " << N->info.tglLahir.tahun << endl;
     cout << "Jenis Kelamin    : " << N->info.jenisKelamin << endl;
     cout << "Tanggal Masuk    : " << N->tglMasuk.hari << " " << converterBulan(N->tglMasuk.bulan) << " " << N->tglMasuk.tahun << endl;
-    cout << "Tanggal Keluar   : " << N->tglKeluar.hari << " " << converterBulan(N->tglKeluar.bulan) << " " << N->tglKeluar.tahun << endl;
-    cout << "Tanggal Eksekusi : " << N->tglEksekusi.hari << " " << converterBulan(N->tglEksekusi.bulan) << " " << N->tglEksekusi.tahun << endl;
+    cout << "Tanggal Keluar   : ";
+    if(N->tglKeluar.hari == 0 && N->tglKeluar.bulan == 0 && N->tglKeluar.hari == 0){
+        cout << "None" << endl;
+    } else if(N->tglKeluar.hari == 999 && N->tglKeluar.bulan == 999 && N->tglKeluar.hari == 999){
+        cout << "SEUMUR HIDUP" << endl;
+    } else {
+        cout << N->tglKeluar.hari << " " << converterBulan(N->tglKeluar.bulan) << " " << N->tglKeluar.tahun << endl;
+    }
+    if(N->tglEksekusi.hari == 0 && N->tglEksekusi.bulan == 0 && N->tglEksekusi.hari == 0){
+        cout << "Tanggal Eksekusi : " << "None" << endl;
+    } else {
+        cout << "Tanggal Eksekusi : " << N->tglEksekusi.hari << " " << converterBulan(N->tglEksekusi.bulan) << " " << N->tglEksekusi.tahun << endl;
+    }
+    while(v != nullptr){
+        cout << "Vonis Kasus  " << "(" << i << ")" << " : ";
+        cout << v->jenis << endl;
+        v = v->next;
+    }
+    cout << "--------------------------------" << endl;
 }
 
 void displaySel(adrSel S) {
     cout << "-------------------------------" << endl;
     cout << "              SEL              " << endl;
     cout << "-------------------------------" << endl;
-    cout << "Nomor      : " << S->nomor << endl;
-    cout << "Kapasitas  : " << S->kapasitas << endl;
-    cout << "Narapidana : " << endl;
+    cout << "Nomor                : " << S->nomor << endl;
+    cout << "Kapasitas            : " << S->kapasitas << endl;
+    cout << "Narapidana           : " << endl;
     adrNapi N;
     int i = 1;
     N = S->firstNapi;
     while(N != nullptr){
         cout << "Id Narapidana   " << i << " : " << N->id << endl;
         cout << "Nama Narapidana " << i << " : " << N->info.nama << endl;
+        N = N->next;
     }
+    cout << "-------------------------------" << endl;
 }
 
 void displayAll(Penjara P) {
@@ -334,13 +357,22 @@ void displayAll(Penjara P) {
     adrSel S;
     adrNapi N;
     while(B != nullptr){
-        cout << "  " << B->nama << endl;
+        cout << "  " << B->nama;
+        if(B->nama == "A"){
+            cout << "[KRIMINAL BERBAHAYA]" << endl;
+        } else if(B->nama == "B"){
+            cout << "[KRIMINAL PRIA]" << endl;
+        } else if(B->nama == "C"){
+            cout << "[KRIMINAL WANITA]" << endl;
+        } else {
+            cout << "[KRIMINAL DI BAWAH UMUR]" << endl;
+        }
         S = B->firstSel;
         while(S != nullptr){
             cout << "    " << S->nomor << endl;
             N = S->firstNapi;
             while(N != nullptr){
-                cout << "      " << N->info.nama << endl;
+                cout << "      " << N->info.nama << "[" << N->id << "]" << endl;
                 N = N->next;
             }
             S = S->next;
@@ -349,21 +381,97 @@ void displayAll(Penjara P) {
     }
 }
 
+bool isUniqueNapi(Penjara P, string idNapi){
+    adrBlok B;
+    adrSel S;
+    adrNapi N;
+    bool isUnique = true;
+
+    B = P.first;
+    while(B != nullptr && isUnique){
+        S = B->firstSel;
+        while(S != nullptr && isUnique){
+            N = S->firstNapi;
+            while(N != nullptr && isUnique){
+                if(N->id == idNapi){
+                    isUnique = false;
+                } else {
+                    N = N->next;
+                }
+            }
+            S = S->next;
+        }
+        B = B->next;
+    }
+    return isUnique;
+}
+
+bool isUniqueVonis(Penjara P, string idVonis){
+    adrBlok B;
+    adrSel S;
+    adrNapi N;
+    adrVonis V;
+    bool isUnique = true;
+
+    B = P.first;
+    while(B != nullptr && isUnique){
+        S = B->firstSel;
+        while(S != nullptr && isUnique){
+            N = S->firstNapi;
+            while(N != nullptr && isUnique){
+                V = N->firstVonis;
+                while(V != nullptr && isUnique){
+                    if(V->id == idVonis){
+                        isUnique = false;
+                    } else {
+                        V = V->next;
+                    }
+                }
+                N = N->next;
+            }
+            S = S->next;
+        }
+        B = B->next;
+    }
+    return isUnique;
+}
+
+bool isEmptyPenjara(Penjara P){
+    adrBlok B;
+    adrSel S;
+    bool isEmpty = true;
+
+    B = P.first;
+    while(B != nullptr && isEmpty){
+        S = B->firstSel;
+        while(S != nullptr && isEmpty){
+            if(S->firstNapi != nullptr){
+                isEmpty = false;
+            } else {
+                S = S->next;
+            }
+        }
+        B = B->next;
+    }
+    return isEmpty;
+}
 
 bool isFullBlok (adrBlok B){
     adrSel S = B->firstSel;
     adrNapi N;
-    int i1,i2;
-    while (S->next != nullptr){
+    bool isValid = true;
+    while (S != nullptr && isValid){
+        if(!isFullSel(S)){
+            isValid = false;
+        }
         S = S->next;
     }
 
-    if(isFullSel(S)){
+    if(isValid){
         return true;
     } else {
         return false;
     }
-
 }
 
 bool isFullSel (adrSel S){
@@ -397,9 +505,9 @@ void jebloskanNapi (Penjara &P, adrNapi N, tanggal tglSistem){
                 delete v;
             } else {
                 while(v!=nullptr){
-                N->firstVonis=v->next;
-                delete v;
-                v = N->firstVonis;
+                    N->firstVonis=v->next;
+                    delete v;
+                    v = N->firstVonis;
                 }
             }
             delete N;
@@ -425,9 +533,9 @@ void jebloskanNapi (Penjara &P, adrNapi N, tanggal tglSistem){
                 delete v;
             } else {
                 while(v!=nullptr){
-                N->firstVonis=v->next;
-                delete v;
-                v = N->firstVonis;
+                    N->firstVonis=v->next;
+                    delete v;
+                    v = N->firstVonis;
                 }
             }
             delete N;
@@ -441,8 +549,8 @@ void jebloskanNapi (Penjara &P, adrNapi N, tanggal tglSistem){
             }
             insertNapi(P,S,N);
         }
-    } else if((N->tglEksekusi.tahun == 0 && N->tglEksekusi.bulan == 0 && N->tglEksekusi.hari == 0) || (N->tglKeluar.tahun == 999 && N->tglKeluar.bulan == 999 && N->tglKeluar.hari == 999)){
-        if(isFullBlok (cariBlok(P,"A"))){
+    } else if((N->tglEksekusi.tahun == 0 && N->tglEksekusi.bulan == 0 && N->tglEksekusi.hari == 0) && (N->tglKeluar.tahun != 999 && N->tglKeluar.bulan != 999 && N->tglKeluar.hari != 999)){
+        if(isFullBlok (cariBlok(P,"B"))){
             cout << endl;
             cout << "Blok penuh" << endl;
             cout << endl;
@@ -453,9 +561,9 @@ void jebloskanNapi (Penjara &P, adrNapi N, tanggal tglSistem){
                 delete v;
             } else {
                 while(v!=nullptr){
-                N->firstVonis=v->next;
-                delete v;
-                v = N->firstVonis;
+                    N->firstVonis=v->next;
+                    delete v;
+                    v = N->firstVonis;
                 }
             }
             delete N;
@@ -470,7 +578,7 @@ void jebloskanNapi (Penjara &P, adrNapi N, tanggal tglSistem){
             insertNapi(P,S,N);
         }
     } else {
-        if(isFullBlok (cariBlok(P,"B"))){
+        if(isFullBlok (cariBlok(P,"A"))){
             cout << endl;
             cout << "Blok penuh" << endl;
             cout << endl;
@@ -481,9 +589,9 @@ void jebloskanNapi (Penjara &P, adrNapi N, tanggal tglSistem){
                 delete v;
             } else {
                 while(v!=nullptr){
-                N->firstVonis=v->next;
-                delete v;
-                v = N->firstVonis;
+                    N->firstVonis=v->next;
+                    delete v;
+                    v = N->firstVonis;
                 }
             }
             delete N;
@@ -503,10 +611,16 @@ void jebloskanNapi (Penjara &P, adrNapi N, tanggal tglSistem){
 void tambahCatatan(Penjara &P, adrSel S, adrNapi N, adrCatatan C, tanggal tglSistem){
     insertCatatan(P,N,C);
 
-    if(C->jenis == "Remisi" && tglSistem.tahun>=(N->tglKeluar.tahun)-(C->remisi/12) && tglSistem.bulan>=(N->tglKeluar.bulan)-(C->remisi%12)){
+    if(C->jenis == "Remisi" && tglSistem.tahun>=(N->tglKeluar.tahun)-(C->remisi/12) && tglSistem.bulan>=(N->tglKeluar.bulan)-(C->remisi%12) && tglSistem.hari > N->tglKeluar.hari){
         hapusNapi(P,S,N);
     } else if(C->jenis == "Mutasi"){
         hapusNapi(P,S,N);
+    } else {
+        N->tglKeluar.bulan -= ((C->remisi%12)+1);
+        while(N->tglKeluar.bulan < 0){
+            N->tglKeluar.tahun--;
+            N->tglKeluar.bulan += 12;
+        }
     }
 }
 
@@ -536,7 +650,6 @@ void menuUtama(Penjara &P, tanggal tglSistem) {
                     break;
                 case 2:
                     if(P.first == nullptr){
-                        cout << endl;
                         cout << "Penjara belum digenerasi!" << endl;
                         cout << endl;
                     } else {
@@ -546,7 +659,6 @@ void menuUtama(Penjara &P, tanggal tglSistem) {
                     break;
                 case 3:
                     if(P.first == nullptr){
-                        cout << endl;
                         cout << "Penjara belum digenerasi!" << endl;
                         cout << endl;
                     } else {
@@ -559,7 +671,6 @@ void menuUtama(Penjara &P, tanggal tglSistem) {
                     break;
                 default:
                     isChosen = true;
-                    cout << endl;
                     cout << "Opsi tidak valid" << endl;
                     cout << endl;
             }
@@ -657,7 +768,7 @@ void menuNarapidana (Penjara &P, tanggal tglSistem){
         cout << " 3.Kembali" << endl;
         cout << "---------------------" << endl;
 
-        while(opsi != 3){
+        while(opsi != 3 && !isChosen){
             cout << "Pilih : ";
             cin >> opsi;
             cout << endl;
@@ -680,8 +791,21 @@ void menuNarapidana (Penjara &P, tanggal tglSistem){
                     cin >> n;
                     cout << endl;
                     while(i1 < n){
-                        cout << "ID Narapidana: ";
-                        cin >> idNapi;
+                        while(!isValid){
+                            cout << "ID Narapidana: ";
+                            cin >> idNapi;
+                            if(isUniqueNapi(P,idNapi)){
+                                cout << endl;
+                                cout << "Id Valid." << endl;
+                                cout << endl;
+                                isValid = true;
+                            } else {
+                                cout << endl;
+                                cout << "Id Tidak Valid!" << endl;
+                                cout << endl;
+                            }
+                        }
+                        isValid = false;
                         cout << "Nama Narapidana: ";
                         cin >> info.nama;
                         while(!isValid){
@@ -707,12 +831,13 @@ void menuNarapidana (Penjara &P, tanggal tglSistem){
                         while(!isValid){
                             cout << "Jenis Kelamin Narapidana: ";
                             cin >> info.jenisKelamin;
-                            cout << endl;
                             if(info.jenisKelamin == "Laki-laki" || info.jenisKelamin == "Perempuan"){
+                                cout << endl;
                                 cout << "Jenis kelamin valid." << endl;
                                 cout << endl;
                                 isValid = true;
                             } else {
+                                cout << endl;
                                 cout << "Jenis kelamin tidak valid!" << endl;
                                 cout << endl;
                             }
@@ -722,18 +847,17 @@ void menuNarapidana (Penjara &P, tanggal tglSistem){
                             cout << "Tanggal Masuk Narapidana: " << endl;
                             cout << "Hari: ";
                             cin >> tglMasuk.hari;
-                            cout << endl;
                             cout << "Bulan: ";
                             cin >> tglMasuk.bulan;
-                            cout << endl;
                             cout << "Tahun: ";
                             cin >> tglMasuk.tahun;
-                            cout << endl;
                             if(cekTanggal(tglMasuk.hari,tglMasuk.bulan,tglMasuk.tahun) && cekTanggal2(tglMasuk,tglSistem) && cekTanggal4(info.tglLahir,tglMasuk)){
+                                cout << endl;
                                 cout << "Tanggal valid." << endl;
                                 cout << endl;
                                 isValid = true;
                             } else {
+                                cout << endl;
                                 cout << "Tanggal tidak valid!" << endl;
                                 cout << endl;
                             }
@@ -743,18 +867,17 @@ void menuNarapidana (Penjara &P, tanggal tglSistem){
                             cout << "Tanggal Keluar Narapidana: " << endl;
                             cout << "Hari: ";
                             cin >> tglKeluar.hari;
-                            cout << endl;
                             cout << "Bulan: ";
                             cin >> tglKeluar.bulan;
-                            cout << endl;
                             cout << "Tahun: ";
                             cin >> tglKeluar.tahun;
-                            cout << endl;
                             if(cekTanggal(tglKeluar.hari,tglKeluar.bulan,tglKeluar.tahun) && cekTanggal3(tglKeluar,tglSistem) && cekTanggal4(info.tglLahir,tglMasuk)){
+                                cout << endl;
                                 cout << "Tanggal valid." << endl;
                                 cout << endl;
                                 isValid = true;
                             } else {
+                                cout << endl;
                                 cout << "Tanggal tidak valid!" << endl;
                                 cout << endl;
                             }
@@ -765,18 +888,17 @@ void menuNarapidana (Penjara &P, tanggal tglSistem){
                                 cout << "Tanggal Eksekusi Narapidana: " << endl;
                                 cout << "Hari: ";
                                 cin >> tglEksekusi.hari;
-                                cout << endl;
                                 cout << "Bulan: ";
                                 cin >> tglEksekusi.bulan;
-                                cout << endl;
                                 cout << "Tahun: ";
                                 cin >> tglEksekusi.tahun;
-                                cout << endl;
                                 if(cekTanggal(tglEksekusi.hari,tglEksekusi.bulan,tglEksekusi.tahun) && cekTanggal3(tglEksekusi,tglSistem) && cekTanggal4(info.tglLahir,tglMasuk)){
+                                    cout << endl;
                                     cout << "Tanggal valid." << endl;
                                     cout << endl;
                                     isValid = true;
                                 } else {
+                                    cout << endl;
                                     cout << "Tanggal tidak valid!" << endl;
                                     cout << endl;
                                 }
@@ -786,6 +908,7 @@ void menuNarapidana (Penjara &P, tanggal tglSistem){
                             tglEksekusi.bulan = 0;
                             tglEksekusi.tahun = 0;
                         }
+                        isValid = false;
                         adrNapi N;
                         string cek, idVonis, jenisVonis;
                         adrVonis V;
@@ -799,9 +922,21 @@ void menuNarapidana (Penjara &P, tanggal tglSistem){
                         cout << endl;
                         while(cek != "YES"){
                             isNotValid = true;
-                            cout << "ID Vonis: ";
-                            cin >> idVonis;
-                            cout << endl;
+                            while(!isValid){
+                                cout << "ID Vonis: ";
+                                cin >> idVonis;
+                                if(isUniqueVonis(P,idVonis)){
+                                    cout << endl;
+                                    cout << "Id Valid." << endl;
+                                    cout << endl;
+                                    isValid = true;
+                                } else {
+                                    cout << endl;
+                                    cout << "Id Tidak Valid!" << endl;
+                                    cout << endl;
+                                }
+                            }
+                            isValid = false;
                             while(isNotValid){
                                 i2 = 0;
                                 cout << "Jenis Vonis: ";
@@ -835,33 +970,57 @@ void menuNarapidana (Penjara &P, tanggal tglSistem){
                     break;
                 }
                 case 2: {
-                    isChosen = true;
-                    adrNapi N;
-                    adrSel S;
-                    adrBlok B;
-                    adrCatatan C;
-                    string idNapi;
-                    string idCatatan, jenis, keterangan;
-                    int remisi;
-                    cout << "Id Narapidana: " << endl;
-                    cin >> idNapi;
-                    cout << endl;
-                    cout << "Id Catatan: " << endl;
-                    cin >> idCatatan;
-                    cout << endl;
-                    cout << "jenis Catatan (Remisi/Mutasi): " << endl;
-                    cin >> jenis;
-                    cout << endl;
-                    cout << "Remisi (dalam Bulan): " << endl;
-                    cin >> remisi;
-                    cout << endl;
-                    cout << "Keterangan Catatan (Bebas): " << endl;
-                    cin >> keterangan;
-                    cout << endl;
-                    createCatatan(idCatatan,jenis,keterangan,remisi);
-                    cariNapi(P,B,S,N,idNapi);
-                    tambahCatatan(P,S,N,C,tglSistem);
-                    cout << "Catatan berhasil ditambahkan!" << endl;
+                    if(isEmptyPenjara(P)){
+                        cout << "Belum ada narapidana tersedia!" << endl;
+                        cout << endl;
+                    } else {
+                        bool isValid = false;
+                        isChosen = true;
+                        adrNapi N;
+                        adrSel S;
+                        adrBlok B;
+                        adrCatatan C;
+                        string idNapi;
+                        string idCatatan, jenis, keterangan;
+                        int remisi;
+                        while(!isValid){
+                            cout << "Id Narapidana: " << endl;
+                            cin >> idNapi;
+                            cariNapi(P,B,S,N,idNapi);
+                            if((N->tglEksekusi.hari != 0 && N->tglEksekusi.bulan != 0 && N->tglEksekusi.tahun != 0) || (N->tglKeluar.hari == 999 && N->tglKeluar.bulan == 999 && N->tglKeluar.tahun == 999)){
+                                cout << endl;
+                                cout << "Narapidana Penjara Seumur Hidup atau Hukuman Mati tidak dapat diberi catatan!" << endl;
+                                cout << endl;
+                            } else if (N != nullptr){
+                                isValid = true;
+                            } else {
+                                cout << endl;
+                                cout << "Narapidana TIDAK ditemukan!" << endl;
+                                cout << endl;
+                            }
+                        }
+                        isValid = false;
+                        while(jenis != "Remisi" && jenis != "Mutasi"){
+                            cout << "jenis Catatan (Remisi/Mutasi): ";
+                            cin >> jenis;
+                            if(jenis != "Remisi" && jenis != "Mutasi"){
+                                cout << endl;
+                                cout << "Jenis Catatan tidak valid!" << endl;
+                                cout << endl;
+                            }
+                        }
+                        if(jenis != "Mutasi"){
+                            cout << "Remisi (dalam Bulan): ";
+                            cin >> remisi;
+                        }
+                        cout << "Keterangan Catatan (Bebas): ";
+                        cin >> keterangan;
+                        C = createCatatan(jenis,keterangan,remisi);
+                        tambahCatatan(P,S,N,C,tglSistem);
+                        cout << endl;
+                        cout << "Catatan berhasil ditambahkan!" << endl;
+                        cout << endl;
+                    }
                     break;
                 }
                 case 3:
@@ -869,7 +1028,6 @@ void menuNarapidana (Penjara &P, tanggal tglSistem){
                     break;
                 default:
                     isChosen = true;
-                    cout << endl;
                     cout << "Opsi tidak valid" << endl;
                     cout << endl;
             }
@@ -904,39 +1062,56 @@ void menuTampil(Penjara P, tanggal tglSistem){
                     break;
                 case 2:{
                     isChosen = true;
-                    string idNapi;
-                    adrBlok B;
-                    adrSel S;
-                    adrNapi N;
-                    cout << endl;
-                    cout << "Id Napi: ";
-                    cin >> idNapi;
-                    cout << endl;
-                    cariNapi(P,B,S,N,idNapi);
-                    if(N == nullptr){
-                        cout << "Narapidana dengan Id terkait tidak ditemukan!" << endl;
-                    } else {
+                    if(isEmptyPenjara(P)){
+                        cout << "Belum ada narapidana tersedia!" << endl;
                         cout << endl;
-                        cout << "Blok : " << B->nama << endl;
-                        cout << "Sel  : " << S->nomor << endl;
-                        displayNapi(N);
+                    } else {
+                        string idNapi;
+                        adrBlok B;
+                        adrSel S;
+                        adrNapi N;
+                        cout << endl;
+                        cout << "Id Napi: ";
+                        cin >> idNapi;
+                        cout << endl;
+                        cariNapi(P,B,S,N,idNapi);
+                        if(N != nullptr){
+                            cout << endl;
+                            cout << "Blok : " << B->nama << endl;
+                            cout << "Sel  : " << S->nomor << endl;
+                            displayNapi(N);
+                        }
                     }
                     break;
                 }
                 case 3: {
+                    bool isValid = false;
                     isChosen = true;
                     adrBlok B;
                     adrSel S;
                     string namaBlok;
                     cout << "Blok: ";
-                    cin >> namaBlok;
-                    cout << endl;
-                    B = cariBlok(P, namaBlok);
+                    while(!isValid){
+                        cin >> namaBlok;
+                        B = cariBlok(P, namaBlok);
+                        if(B == nullptr){
+                            cout << endl;
+                            cout << "Nama blok TIDAK valid!" << endl;
+                            cout << endl;
+                        } else {
+                            cout << endl;
+                            cout << "Nama blok valid." << endl;
+                            cout << endl;
+                            isValid = true;
+                        }
+                    }
+                    isValid = false;
                     S = B->firstSel;
                     while(S != nullptr){
                         displaySel(S);
                         S = S->next;
                     }
+                    cout << endl;
                     break;
                 }
                 case 4:
@@ -944,7 +1119,6 @@ void menuTampil(Penjara P, tanggal tglSistem){
                     break;
                 default:
                     isChosen = true;
-                    cout << endl;
                     cout << "Opsi tidak valid" << endl;
                     cout << endl;
             }

@@ -45,7 +45,6 @@ struct elmVonis {
 
 //Struct Catatan Perihal Narapidana
 struct elmCatatan {
-    string id;
     string jenis;
     string keterangan;
     int remisi;
@@ -79,7 +78,7 @@ void createBlok (adrBlok &B, string namaBlok, string jumlahSel);
 void createSel (adrSel &S, int nomorSel, int kapasitas);
 void createNapi (adrNapi &N, string idNapi, infoKependudukan info, tanggal tglMasuk, tanggal tglKeluar, tanggal tglEksekusi, tanggal tglSistem);
 void createVonis (adrVonis &V, string idVonis, string jenis);
-adrCatatan createCatatan (string idCatatan, string jenis, string keterangan, int remisi);
+adrCatatan createCatatan (string jenis, string keterangan, int remisi);
 
 
 //Insert
@@ -98,6 +97,8 @@ void cariNapi (Penjara P, adrBlok &B, adrSel &S, adrNapi &N, string idNapi);
 
 //Hapus
 void hapusNapi (Penjara &P, adrSel S, adrNapi N);
+void hapusSemuaVonis (adrNapi &N);
+void hapusSemuaCatatan (adrNapi &N);
 
 //Boolean
 bool isFullBlok (adrBlok B);
@@ -105,6 +106,10 @@ bool isFullSel (adrSel S);
 bool cekTanggal(int hari, int bulan, int tahun);
 bool cekTanggal2(tanggal tgl, tanggal tglSistem);
 bool cekTanggal3(tanggal tgl, tanggal tglSistem);
+bool cekTanggal4(tanggal tglLahir, tanggal tgl);
+bool isUniqueNapi(Penjara P, string idNapi);
+bool isUniqueVonis(Penjara P, string idVonis);
+bool isEmptyPenjara(Penjara P);
 
 //Display
 void displaySel (adrSel S);
